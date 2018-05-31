@@ -37,7 +37,17 @@ cur = CONN.cursor()
 cur.executescript(SQL)
 ```
 
-2. Test select and insert operations to your db:
+2. Configure your models in models.py:
+```
+from orm import Structure, String, Integer, Float
+
+class Stock(Structure):
+    name = String()
+    shares = Integer()
+    price = Float()
+```
+
+3. Test select and insert operations to your db:
 ```
 stock2 = Stock()
 stock2.insert(name='GOOGLE', shares=2, price=22222.1)
