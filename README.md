@@ -20,14 +20,14 @@ git clone https://github.com/kheeva/otus_dz5_orm
 # How to use
 1. Manually install a database:
 schema.sql
-`
+```
 CREATE TABLE Stock (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(256),
     shares INTEGER,
     price FLOAT
 );
-`
+```
 exec code:
 ```
 SQL = open('schema.sql').read()
