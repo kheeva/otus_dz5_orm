@@ -1,6 +1,6 @@
 from inspect import Signature, Parameter
 from collections import OrderedDict
-from databases2 import Database
+from databases import Database
 
 
 def make_signature(names):
