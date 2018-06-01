@@ -1,6 +1,6 @@
 from inspect import Signature, Parameter
 from collections import OrderedDict
-from databases import Database
+from databases2 import Database
 
 
 def make_signature(names):
@@ -56,7 +56,8 @@ class Insert:
             table_name,
             table_rows,
             q_marks)
-        return Database.execute(query, *list(clsdict.values()))
+        db = Database()
+        return db.execute(query, tuple(clsdict.values()))
 
 
 class Select:
@@ -75,7 +76,8 @@ class Select:
             table_name,
             query_where,
         )
-        return Database.execute(query, *query_args).fetchall()
+        d = Database()
+        return d.execute(query, query_args).fetchall()
 
 
 class NoDupOrderedDict(OrderedDict):
