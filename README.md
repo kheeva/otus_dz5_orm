@@ -57,6 +57,7 @@ Insert
 ```
 stock.insert(name='GOOGLE', shares=2, price=22222.1)
 stock.insert(name='YANDEX', shares=2, price=22.1)
+```
 
 Select
 ```
