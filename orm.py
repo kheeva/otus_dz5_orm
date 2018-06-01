@@ -54,21 +54,23 @@ class Method:
         self.table_name = self.cls.__name__
         self.table_rows = tuple(self.query_args.keys())
         self.obj_args = tuple(self.query_args.values())
+        self.db = db = Database()
 
+    @property
     def insert(self):
         question_marks_str = ', '.join(['?'] * len(self.table_rows))
         query = 'INSERT INTO %s%s values(%s)' % (self.table_name,
                                                  self.table_rows,
                                                  question_marks_str,)
-        db = Database()
-        return db.execute(query, self.obj_args)
+        return self.db.execute(query, self.obj_args)
 
+    @property
     def select(self):
         where_args = [key + ' = ?' for key in self.table_rows]
         query_where = 'WHERE ' + ' AND '.join(where_args) if where_args else ''
         query = 'SELECT * FROM %s %s' % (self.table_name, query_where)
-        d = Database()
-        return d.execute(query, self.obj_args).fetchall()
+
+        return self.db.execute(query, self.obj_args).fetchall()
 
 
 class NoDupOrderedDict(OrderedDict):
@@ -104,7 +106,7 @@ class Structure(metaclass=StructMeta):
 
     @classmethod
     def select(cls, **kwargs):
-        for row in Method(cls, kwargs).select():
+        for row in Method(cls, kwargs).select:
             setattr(cls, 'id', row[0])
             cls.create(*row[1:])
             yield cls
@@ -112,4 +114,4 @@ class Structure(metaclass=StructMeta):
     @classmethod
     def insert(cls, **kwargs):
         cls.create(*list(kwargs.values()))
-        return Method(cls, kwargs).insert()
+        return Method(cls, kwargs).insert
