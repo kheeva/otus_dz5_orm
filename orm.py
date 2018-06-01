@@ -54,7 +54,7 @@ class Method:
         self.table_name = self.cls.__name__
         self.table_rows = tuple(self.query_args.keys())
         self.obj_args = tuple(self.query_args.values())
-        self.db = db = Database()
+        self.db = Database()
 
     @property
     def insert(self):
