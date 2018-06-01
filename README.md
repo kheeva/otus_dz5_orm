@@ -47,16 +47,26 @@ class Stock(Structure):
     price = Float()
 ```
 
-3. Test select and insert operations to your db:
+3. Let's test some operations to your db:
+At first we create an object related to a table
 ```
-stock2 = Stock()
-stock2.insert(name='GOOGLE', shares=2, price=22222.1)
-stock2.insert(name='YANDEX', shares=2, price=22.1)
+stock = Stock()
+```
 
-stock = Stock().select(shares=2)
+Insert
+```
+stock.insert(name='GOOGLE', shares=2, price=22222.1)
+stock.insert(name='YANDEX', shares=2, price=22.1)
 
-for s in stock:
+Select
+```
+for s in stock.select(name='GOOGLE'):
     print(s.price)
+```
+
+Delete
+```
+stock.delete(name='YANDEX', price=22.1)
 ``` 
 
 # Project Goals
