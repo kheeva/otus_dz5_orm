@@ -55,6 +55,8 @@ class Method:
         self.table_rows = tuple(self.query_args.keys())
         self.obj_args = tuple(self.query_args.values())
         self.db = Database()
+        __args = [key + ' = ?' for key in self.table_rows]
+        self.query_where = 'WHERE ' + ' AND '.join(__args) if __args else ''
 
     @property
     def insert(self):
@@ -66,11 +68,13 @@ class Method:
 
     @property
     def select(self):
-        where_args = [key + ' = ?' for key in self.table_rows]
-        query_where = 'WHERE ' + ' AND '.join(where_args) if where_args else ''
-        query = 'SELECT * FROM %s %s' % (self.table_name, query_where)
-
+        query = 'SELECT * FROM %s %s' % (self.table_name, self.query_where)
         return self.db.execute(query, self.obj_args).fetchall()
+
+    @property
+    def delete(self):
+        query = 'DELETE FROM %s %s' % (self.table_name, self.query_where)
+        return self.db.execute(query, self.obj_args)
 
 
 class NoDupOrderedDict(OrderedDict):
@@ -115,3 +119,7 @@ class Structure(metaclass=StructMeta):
     def insert(cls, **kwargs):
         cls.create(*list(kwargs.values()))
         return Method(cls, kwargs).insert
+
+    @classmethod
+    def delete(cls, **kwargs):
+        return Method(cls, kwargs).delete
