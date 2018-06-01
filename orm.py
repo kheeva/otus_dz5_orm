@@ -47,37 +47,28 @@ class String(Typed):
     ty = str
 
 
-class Insert:
-    def __new__(cls, clsname, clsdict):
-        table_name = clsname.__name__
-        table_rows = tuple(clsdict.keys())
-        q_marks = ', '.join(['?'] * len(table_rows))
-        query = 'INSERT INTO %s%s values(%s)' % (
-            table_name,
-            table_rows,
-            q_marks)
-        db = Database()
-        return db.execute(query, tuple(clsdict.values()))
-
-
-class Select:
-    def __init__(self, cls, kwargs):
+class Method:
+    def __init__(self, cls, query_args):
         self.cls = cls
-        self.kwargs = kwargs
+        self.query_args = query_args
+        self.table_name = self.cls.__name__
+        self.table_rows = tuple(self.query_args.keys())
+        self.obj_args = tuple(self.query_args.values())
 
-    def __new__(cls, clsname, clsdict):
-        table_name = clsname.__name__
-        table_rows = tuple(clsdict.keys())
-        query_args = list(clsdict.values())
-        where_keys = [key+' = ?' for key in clsdict.keys()]
-        query_where = 'where ' + ' and '.join(where_keys) if len(where_keys) > 0 else ''
-        query = 'SELECT * FROM %s %s' % (
-            # table_rows,
-            table_name,
-            query_where,
-        )
+    def insert(self):
+        question_marks_str = ', '.join(['?'] * len(self.table_rows))
+        query = 'INSERT INTO %s%s values(%s)' % (self.table_name,
+                                                 self.table_rows,
+                                                 question_marks_str,)
+        db = Database()
+        return db.execute(query, self.obj_args)
+
+    def select(self):
+        where_args = [key + ' = ?' for key in self.table_rows]
+        query_where = 'WHERE ' + ' AND '.join(where_args) if where_args else ''
+        query = 'SELECT * FROM %s %s' % (self.table_name, query_where)
         d = Database()
-        return d.execute(query, query_args).fetchall()
+        return d.execute(query, self.obj_args).fetchall()
 
 
 class NoDupOrderedDict(OrderedDict):
@@ -105,8 +96,6 @@ class StructMeta(type):
 
 
 class Structure(metaclass=StructMeta):
-    # _fields = []
-
     @classmethod
     def create(cls, *args, **kwargs):
         bound = cls.__signature__.bind(*args, **kwargs)
@@ -115,7 +104,7 @@ class Structure(metaclass=StructMeta):
 
     @classmethod
     def select(cls, **kwargs):
-        for row in Select(cls, kwargs):
+        for row in Method(cls, kwargs).select():
             setattr(cls, 'id', row[0])
             cls.create(*row[1:])
             yield cls
@@ -123,4 +112,4 @@ class Structure(metaclass=StructMeta):
     @classmethod
     def insert(cls, **kwargs):
         cls.create(*list(kwargs.values()))
-        return Insert(cls, kwargs)
+        return Method(cls, kwargs).insert()
